@@ -1,5 +1,5 @@
 {
-  "BaseUrl": "http://44.203.38.223:8000/api/v1/",
+  "BaseUrl": "http://98.80.128.151:8000/api/v1/",
   "_commentBaseUrl": "https://98.80.128.151:8443/api/",
   "bucketName": "testtranscriberapp",
   "EndDirFolder": "ai-summarize/",

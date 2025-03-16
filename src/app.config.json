@@ -1,5 +1,5 @@
 {
-  "BaseUrl": "http://98.80.128.151:8000/api/v1/",
+  "BaseUrl": "https://fzi6g8lot8.execute-api.us-east-1.amazonaws.com/dev/",
   "_commentBaseUrl": "https://98.80.128.151:8443/api/",
   "bucketName": "testtranscriberapp",
   "EndDirFolder": "ai-summarize/",

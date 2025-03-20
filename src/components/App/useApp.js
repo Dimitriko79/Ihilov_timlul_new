@@ -1,11 +1,11 @@
-import {useCallback, useRef, useState} from "react";
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import {aiAgentClean, aiAgentSummary} from "../../services/AgentService";
 import S3Service, {createSessionId} from "../../services/S3Service";
 import {FetchHttpHandler} from "@aws-sdk/fetch-http-handler";
 import {StartStreamTranscriptionCommand, TranscribeStreamingClient} from "@aws-sdk/client-transcribe-streaming";
 import { Buffer } from 'buffer';
 import config from '../../app.config.json';
-import { uploadFile, TranscribeFileAsync, getFile } from '../../services/GeneralService'
+import { uploadFile, TranscribeFileAsync, getFile,cleanTranscribeAsync,summarizeAsync } from '../../services/GeneralService'
 
 
 
@@ -20,6 +20,7 @@ export const useApp = () => {
     const [selectedFileName, setSelectedFileName] = useState('');
     const [isLoadingTranscription, setIsLoadingTranscription] = useState(false);
     const [transcriptionCopy, setTranscriptionCopy] = useState('')
+    const [isLoading, setIsLoading] = useState(false);
 
 
     const fileInputRef = useRef(null);
@@ -43,53 +44,59 @@ export const useApp = () => {
     const [numSpeakers, setNumSpeakers] = useState(1);
     const [language, setLanguage] = useState('he-IL');
 
+    useEffect(() => {
+        if (error !== '') {
+          setIsLoading(false); // אם יש שגיאה, הפסיקי את הטעינה
+        }
+      }, [error]);
+
     const handleCleanText = async () => {
-        if (!sessionId) {
-            setError('No active session');
-            return;
-        }
+
 
         try {
-            setIsProcessingAI(true);
-
-            // Create a progress handler
-            const handleProgress = (progressText) => {
-                setTranscription(progressText);
-            };
-
-            await aiAgentClean(sessionId, handleProgress);
-
+          setIsLoading(true);
+          setError('');
+    
+          // Create a progress handler
+          const handleProgress = progressText => {
+            setTranscription(progressText)
+          }
+          const cleanText = await cleanTranscribeAsync(config.bucketName, transcription)
+          setTranscription(cleanText)
+          setIsLoading(false);
+    
+          //openModal()
         } catch (error) {
-            console.error('Error cleaning text:', error);
-            setError('שגיאה בניקוי הטקסט');
-        } finally {
-            setIsProcessingAI(false);
+          console.error('Error cleaning text:', error)
+          updateError('שגיאה בניקוי הטקסט')
         }
-    };
+      }
 
-    const handleAISummary = async () => {
-        if (!sessionId) {
-            setError('No active session');
-            return;
-        }
+      const handleAISummary = async () => {
 
         try {
-            setIsProcessingAI(true);
-
-            // Create a progress handler
-            const handleProgress = (progressText) => {
-                setTranscription(progressText);
-            };
-
-            await aiAgentSummary(sessionId, handleProgress);
-
+          setIsLoading(true);
+          setError('');
+          //Create a progress handler
+          const handleProgress = progressText => {
+            setTranscription(progressText)
+          }
+          if (transcription === '') {
+            updateError('יש לטעון קובץ לסיכום')
+            return;
+          }
+          debugger;
+          const response = await summarizeAsync(config.bucketName, '', transcription);
+          setTranscription(response)
+          setIsLoading(false);
+    
         } catch (error) {
-            console.error('Error generating summary:', error);
-            setError('שגיאה ביצירת סיכום');
+          console.error('Error generating summary:', error)
+          updateError('שגיאה ביצירת סיכום')
         } finally {
-            setIsProcessingAI(false);
+          setIsProcessingAI(false)
         }
-    };
+      }
 
 
     const loadTranscription = async (sessionId) => {
@@ -140,9 +147,9 @@ export const useApp = () => {
     };
 
     const handleFileSelect = async event => {
-        setIsLoadingTranscription(true);
+        setIsLoading(true);
         setTranscription('');
-        // setAudioUrl(null);
+        //setAudioUrl(null);
     
         const file = event.target.files[0]
         if (!file) return
@@ -185,14 +192,14 @@ export const useApp = () => {
         updateError('')
         if (file.type === 'text/plain') {
           await setContentFile(file)
-          setIsLoadingTranscription(false);
+          setIsLoading(false);
           setUploadingFile(false)
         }
         else {
           try {
-            const newSessionId = createSessionId()
-            setSessionId(newSessionId)
-            // setAudioUrl(null);
+            // const newSessionId = createSessionId()
+            // setSessionId(newSessionId)
+            //setAudioUrl(null);
             // Log file information for debugging
             console.log('Uploading file:', {
               name: file.name,
@@ -203,7 +210,7 @@ export const useApp = () => {
             // let fileName = config.MediaLoadFolder + file.name
             const fileName = `${config.MediaLoadFolder}audio_${file.name}`;
             const fileBase64 = await fileToBase64(file) // הפיכת הקובץ ל-Base64
-            // setAudioUrl(URL.createObjectURL(file));
+           // setAudioUrl(URL.createObjectURL(file));
             const response = await uploadFile(config.bucketName, fileName, fileBase64)
             if (response) {
               const res = await TranscribeFileAsync(config.bucketName, '', fileName, language, numSpeakers, config.TranscriptionFolder)
@@ -224,7 +231,7 @@ export const useApp = () => {
             if (fileInputRef.current) {
               fileInputRef.current.value = ''
             }
-            setIsLoadingTranscription(false);
+            setIsLoading(false);
     
           } catch (error) {
             console.error('Error handling file:', error)
@@ -234,7 +241,6 @@ export const useApp = () => {
           }
         }
       }
-
       
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -600,6 +606,8 @@ export const useApp = () => {
         numSpeakers, setNumSpeakers,
         language, setLanguage,
         sessionId,
+        isLoading,
+        transcriptionCopy,
         handleCleanText,
         handleFileSelect,
         handleAISummary,

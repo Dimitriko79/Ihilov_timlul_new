@@ -45,14 +45,14 @@ const LoaderButton = ({ isLoading, withIndicatorTime = false, isFromError = fals
   return (
     <div className="flex items-center justify-center gap-4 p-4">
       <button
-        className="flex flex-col items-center justify-center rounded-full p-2 bg-[#007e41] text-white hover:bg-[#007e4191] disabled:opacity-50 w-60"
+        className="flex flex-col items-center justify-center rounded-full p-2 bg-[#61dafb] text-white hover:bg-[#007e4191] disabled:opacity-50 w-60"
         disabled={isLoading}
       >
         {isVisible && (
           <>
             <RotateCcw className="animate-spin" size={20} /> {/* אייקון מסתובב */}
             <div className="text-xs mt-1">
-              טוען... 
+              ...טוען 
               {withIndicatorTime && ` ${progress}%`}
             </div>
           </>

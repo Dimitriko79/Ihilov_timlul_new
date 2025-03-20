@@ -54,7 +54,7 @@ export const useTextDisplay = ({ text, sessionId } ) => {
                 : `ai-summaries/${sessionId}.json`;
 
             const command = new GetObjectCommand({
-                Bucket: "testtranscriberapp",
+                Bucket: "product.transcriber",
                 Key: key
             });
 

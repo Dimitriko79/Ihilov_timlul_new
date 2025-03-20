@@ -248,11 +248,11 @@ export const cleanTranscribeAsync = async (bucketName, transcription,fileName=""
                 return res.clean_text;
             }
             if (response.data.status === "failed") {
-                throw new Error(`summarize failed: ${response.data.status}`);
+                throw new Error(`clean failed: ${response.data.status}`);
             }
         }
     } catch (error) {
-        console.error('Error summarize file:', error.message);
+        console.error('Error clean file:', error.message);
         throw error;
     }
 };
@@ -292,7 +292,7 @@ export const TranscribeFileAsync = async (bucketName, fileName, filePath, lang, 
         if (response && response.data) {
             if (response.data.status === "in_progress") {
                 const res =await GetStatusTaskTrans(response.data.task_id,5000)
-                return res.job_name
+                return res.end_dir
             }
             if (response.data.status === "faild") {
                 throw new Error(`Fetch TranscribeFile: ${response.data.status}`);

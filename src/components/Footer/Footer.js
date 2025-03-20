@@ -11,7 +11,9 @@ const Footer = props => {
         language,
         sessionId,
         transcription,
-        selectedFileName
+        selectedFileName,
+        isLoading,
+        transcriptionCopy
     } = props;
 
     return (
@@ -30,9 +32,8 @@ const Footer = props => {
                     </p>
                 </div>
             )}
-            {/*<LoaderButton*/}
-            {/*    isLoading={isLoading} onComplete={() => console.log("הטעינה הושלמה!")}*/}
-            {/*/>*/}
+            <LoaderButton
+              isLoading={isLoading} onComplete={() => console.log("הטעינה הושלמה!")}/>
             {!isRecording && !isProcessing && (
                 <AudioPlayer
                     sessionId={sessionId}
@@ -40,10 +41,11 @@ const Footer = props => {
                 />
             )}
             <TextDisplay
-                text={transcription}
-                sessionId={sessionId}
-                direction={language === 'he-IL' || language === 'ar-AE' ? 'rtl' : 'ltr'}
-            />
+          text={transcription}
+          sessionId={sessionId}
+          direction={language === 'he-IL' || language === 'ar-AE' ? 'rtl' : 'ltr'}
+          textCopy={transcriptionCopy}
+        />
         </div>
     )
 }

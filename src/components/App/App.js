@@ -28,6 +28,8 @@ const MedicalTranscription = () => {
     numSpeakers, setNumSpeakers,
     language, setLanguage,
     sessionId,
+    isLoading,
+    transcriptionCopy,
     handleCleanText,
     handleFileSelect,
     handleAISummary,
@@ -68,12 +70,14 @@ const MedicalTranscription = () => {
         />
         <Footer
             isRecording={isRecording}
-            isProcessing={isProcessing}
+            // isProcessing={isProcessing}
             audioLevel={audioLevel}
             language={language}
             sessionId={sessionId}
             transcription={transcription}
             selectedFileName={selectedFileName}
+            isLoading={isLoading}
+            transcriptionCopy={transcriptionCopy}
         />
       </Main>
     </div>

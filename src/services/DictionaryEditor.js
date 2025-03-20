@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { getDictionary, UploadDictionaryAsync } from "./GeneralService"
+import config from '../app.config.json';
 import images from "../assets/images";
+
 
 const LoadingSpinner = () => (
   <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
@@ -63,7 +65,7 @@ const DictionaryEditor = () => {
     id: '',
     displayAs: ''
   });
-
+const bucketName=config.bucketName;
 
   const loadDictionary = async () => {
     setIsLoading(true);
@@ -86,7 +88,7 @@ const DictionaryEditor = () => {
     setIsSaving(true);
     try {
 
-      var res = await UploadDictionaryAsync("testtranscriberapp", entries);
+      var res = await UploadDictionaryAsync(bucketName, entries);
       if (res === true) {
         loadDictionary();
         setIsSuccess(true);
@@ -237,7 +239,7 @@ const DictionaryEditor = () => {
                 onClick={addNewLine}
                 disabled={error != ''}
                 // className="px-4 py-2 bg-[#007e41]text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                className='p-2 bg-[#007e41] text-white rounded-md hover:bg-[#007e4191] disabled:opacity-50 '
+                className='px-3 py-1 rounded-md text-sm transition-all duration-200 text-white bg-blue-500 hover:bg-blue-600'
               >
                 <span>הוספה</span>
 
@@ -313,7 +315,7 @@ const DictionaryEditor = () => {
                           className="p-2 cursor-pointer rounded-full"
                           title="Add entry"
                         >
-                          {/* <img src={images.save} alt='delete' className="w-5 h-5" /> */}
+                          {/* <img src='/save.png' alt='delete' className="w-5 h-5" /> */}
                           <SaveIcon className="w-5 h-5" />
 
                         </button>
@@ -359,7 +361,7 @@ const DictionaryEditor = () => {
                 <button
                   onClick={saveDictionary}
                   disabled={error != ''}
-                  className="p-3 bg-[#007e41] text-white rounded-md hover:bg-[#007e4191] disabled:opacity-50 shadow-lg"
+                  className="px-3 py-1 rounded-md text-sm transition-all duration-200 text-white bg-blue-500 hover:bg-blue-600"
                   style={{ marginRight: "auto" }}
 
                 >

@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { createSessionId } from '../../services/S3Service'
 import TranscriptionConfig from '../TranscriptionConfig'
 import { uploadFile, TranscribeFileAsync, getFile, cleanTranscribeAsync, summarizeAsync } from '../../services/GeneralService'
-import config from '../../app.config.json';
 import { useMsal } from '@azure/msal-react';
 import Header from "../Header/header";
 import Main from "../Main/Main";

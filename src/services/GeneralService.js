@@ -35,7 +35,7 @@ const GetStatusTaskTrans = async (taskId,timeDelay=1000) => {
             }, { headers: { 'Content-Type': 'application/json' } });
 
             if (response && response.data) {
-                if (response.data.status === "completed") {
+                if (response.data.status.toLowerCase() === "completed") {
                     return response.data.response.data;
                 } else if (response.data.status !== "in_progress") {
                     throw response.data;
@@ -83,7 +83,7 @@ export const getFile = async (bucketName, fileKey) => {
             if (response.data.status === "success") {
                 const jsonData = response.data.file_content;
                 const jsonObject = JSON.parse(jsonData); // המרה ל-Object
-                const content = jsonObject.results.formatted_text;
+                const content = jsonObject.results.transcripts[0].transcript;
                 return content; // data.file_content יכיל את תוכן הקובץ במידת הצורך
             }
             if (response.data.status === "error") {

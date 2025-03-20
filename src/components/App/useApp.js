@@ -4,6 +4,10 @@ import S3Service, {createSessionId} from "../../services/S3Service";
 import {FetchHttpHandler} from "@aws-sdk/fetch-http-handler";
 import {StartStreamTranscriptionCommand, TranscribeStreamingClient} from "@aws-sdk/client-transcribe-streaming";
 import { Buffer } from 'buffer';
+import config from '../../app.config.json';
+import { uploadFile, TranscribeFileAsync, getFile } from '../../services/GeneralService'
+
+
 
 
 export const useApp = () => {
@@ -15,6 +19,8 @@ export const useApp = () => {
     const [uploadingFile, setUploadingFile] = useState(false);
     const [selectedFileName, setSelectedFileName] = useState('');
     const [isLoadingTranscription, setIsLoadingTranscription] = useState(false);
+    const [transcriptionCopy, setTranscriptionCopy] = useState('')
+
 
     const fileInputRef = useRef(null);
     const [sessionId, setSessionId] = useState(null);
@@ -133,81 +139,144 @@ export const useApp = () => {
         }
     };
 
-    const handleFileSelect = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
+    const handleFileSelect = async event => {
+        setIsLoadingTranscription(true);
+        setTranscription('');
+        // setAudioUrl(null);
+    
+        const file = event.target.files[0]
+        if (!file) return
+    
         // List of supported audio MIME types including all MPEG variations
         const supportedAudioTypes = [
-            'audio/mpeg',      // MP3/MPEG files
-            'audio/x-mpeg',    // Alternative MPEG MIME type
-            'video/mpeg',      // MPEG files sometimes use video MIME type
-            'audio/mpeg3',     // Alternative MPEG3 MIME type
-            'audio/x-mpeg3',   // Alternative MPEG3 MIME type
-            'audio/mp3',       // MP3 files
-            'audio/x-mp3',     // Alternative MP3 MIME type
-            'audio/mp4',       // M4A files
-            'audio/wav',       // WAV files
-            'audio/x-wav',     // Alternative WAV MIME type
-            'audio/webm',      // WebM audio
-            'audio/ogg',       // OGG files
-            'audio/aac',       // AAC files
-            'audio/x-m4a'      // Alternative M4A MIME type
-        ];
-
-        // Check if file type is directly supported
-        let isSupported = supportedAudioTypes.includes(file.type);
-
-        // If not directly supported, check file extension for .mpeg files
+          'audio/mpeg', // MP3/MPEG files
+          'audio/x-mpeg', // Alternative MPEG MIME type
+          'video/mpeg', // MPEG files sometimes use video MIME type
+          'audio/mpeg3', // Alternative MPEG3 MIME type
+          'audio/x-mpeg3', // Alternative MPEG3 MIME type
+          'audio/mp3', // MP3 files
+          'audio/x-mp3', // Alternative MP3 MIME type
+          'audio/mp4', // M4A files
+          'audio/wav', // WAV files
+          'audio/x-wav', // Alternative WAV MIME type
+          'audio/webm', // WebM audio
+          'audio/ogg', // OGG files
+          'audio/aac', // AAC files
+          'audio/x-m4a', // Alternative M4A MIME type
+          'text/plain'
+        ]
+    
+        let isSupported = supportedAudioTypes.includes(file.type)
         if (!isSupported && file.name) {
-            const extension = file.name.toLowerCase().split('.').pop();
-            if (extension === 'mpeg') {
-                isSupported = true;
-            }
+          const extension = file.name.toLowerCase().split('.').pop()
+          if (extension === 'mpeg') {
+            isSupported = true
+          }
         }
-
         if (!isSupported) {
-            setError('Please select a supported audio file (MPEG, MP3, WAV, M4A, WebM, OGG, AAC)');
-            return;
+          updateError(
+            'Please select a supported audio file (MPEG, MP3, WAV, M4A, WebM, OGG, AAC,TXT)'
+          )
+          return
         }
-
-        setSelectedFileName(file.name);
-        setUploadingFile(true);
-        setError('');
-
-        try {
-            const newSessionId = createSessionId();
-            setSessionId(newSessionId);
-
+    
+        setUploadingFile(true)
+        setSelectedFileName('');
+        updateError('')
+        if (file.type === 'text/plain') {
+          await setContentFile(file)
+          setIsLoadingTranscription(false);
+          setUploadingFile(false)
+        }
+        else {
+          try {
+            const newSessionId = createSessionId()
+            setSessionId(newSessionId)
+            // setAudioUrl(null);
             // Log file information for debugging
             console.log('Uploading file:', {
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                extension: file.name.split('.').pop()
-            });
-
-            // Upload file to S3
-            await S3Service.uploadMedia(file, newSessionId);
-
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              extension: file.name.split('.').pop()
+            })
+            // let fileName = config.MediaLoadFolder + file.name
+            const fileName = `${config.MediaLoadFolder}audio_${file.name}`;
+            const fileBase64 = await fileToBase64(file) // הפיכת הקובץ ל-Base64
+            // setAudioUrl(URL.createObjectURL(file));
+            const response = await uploadFile(config.bucketName, fileName, fileBase64)
+            if (response) {
+              const res = await TranscribeFileAsync(config.bucketName, '', fileName, language, numSpeakers, config.TranscriptionFolder)
+              if (res) {
+                const response = await getFile(config.bucketName, res);
+                if (response) {
+                  setTranscription(response);
+                  setTranscriptionCopy(response)
+    
+                }
+              }
+            }
+            setUploadingFile(false)
+            setSelectedFileName(file.name)
+    
+    
             // Clear file input
             if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+              fileInputRef.current.value = ''
             }
-
-            setSelectedFileName(`Uploaded: ${file.name}`);
-            console.log('Starting transcription polling for session:', newSessionId);
-
-            // Start loading the transcription
-            await loadTranscription(newSessionId);
-
-        } catch (error) {
-            console.error('Error handling file:', error);
-            setError('Failed to process file: ' + error.message);
-        } finally {
-            setUploadingFile(false);
+            setIsLoadingTranscription(false);
+    
+          } catch (error) {
+            console.error('Error handling file:', error)
+            updateError('Failed to process file: ' + error.message)
+          } finally {
+            setUploadingFile(false)
+          }
         }
-    };
+      }
+
+      
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // קריאת הקובץ
+      reader.onload = () => resolve(reader.result.split(',')[1]); // מחרוזת Base64 (ללא header)
+      reader.onerror = (error) => reject(error);
+    });
+  };
+  const setContentFile = async (file) => {
+    try {
+
+      if (file) {
+        const reader = new FileReader();
+        // פונקציה שתרוץ כשהקריאה של הקובץ הושלמה
+        reader.onload = () => {
+          // setFileContent(reader.result); // גישה לתוכן הקובץ
+          setTranscription(reader.result); // גישה לתוכן הקובץ
+          setTranscriptionCopy(reader.result);
+        };
+        // קריאה של תוכן הקובץ כטקסט
+        reader.readAsText(file)
+        // אפשר לשלוח את האובייקט `file` למקום אחר
+      } else {
+        console.log('No file selected');
+      }
+    }
+    catch (error) {
+
+    }
+  };
+    
+     const updateError = (newValue) => {
+    if (newValue == error && newValue != '') {
+      setError('');
+      setTimeout(() => {
+        setError(newValue);
+      }, 300);
+    }
+    else
+      setError(newValue);
+  };
 
     const transcribeClient = new TranscribeStreamingClient({
         region: process.env.REACT_APP_AWS_REGION || 'us-east-1',

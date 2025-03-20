@@ -259,9 +259,10 @@ export const cleanTranscribeAsync = async (bucketName, transcription,fileName=""
 
 export const UploadDictionaryAsync = async (bucketName, dicArray) => {
     try {
-        const response = await axios.post(`${BASE_URL}upload-dictionary-as`, {
+        const response = await axios.post(`${BASE_URL}dynamic-upload-dictionary-as`, {
             bucket_name: bucketName,
-            dictionary_content: dicArray
+            dictionary_content: dicArray,
+            language_code: "he-IL"
         }, { headers: { 'Content-Type': 'application/json' } });
 
         if (response && response.data) {

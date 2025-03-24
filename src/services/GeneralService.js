@@ -37,7 +37,7 @@ const GetStatusUploadDic = async (vocabName,timeDelay=1000) => {
             if (response && response.data) {
                 if (response.data.status.toUpperCase() === "READY") {
                     return response.data.response.data;
-                } else if (response.data.status.toUpperCase() !== "PENDDING") {
+                } else if (response.data.status.toUpperCase() !== "PENDING") {
                     throw response.data;
                 }
             }

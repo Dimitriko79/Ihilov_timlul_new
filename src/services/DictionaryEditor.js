@@ -361,7 +361,7 @@ const bucketName=config.bucketName;
                 <button
                   onClick={saveDictionary}
                   disabled={error != ''}
-                  className="px-3 py-1 rounded-md text-sm transition-all duration-200 text-white bg-blue-500 hover:bg-blue-600"
+                  className="px-3 py-1 rounded-md text-sm transition-all duration-200 text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-blue-500"
                   style={{ marginRight: "auto" }}
 
                 >

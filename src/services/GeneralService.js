@@ -27,6 +27,28 @@ const GetStatusTask = async (taskId,timeDelay=1000) => {
         }
     }
 };
+const GetStatusUploadDic = async (vocabName,timeDelay=1000) => {
+    while (true) {
+        try {
+            const response = await axios.post(`${BASE_URL}vocab/status`, {
+                vocab_name: vocabName
+            }, { headers: { 'Content-Type': 'application/json' } });
+
+            if (response && response.data) {
+                if (response.data.status.toUpperCase() === "READY") {
+                    return response.data.response.data;
+                } else if (response.data.status.toUpperCase() !== "PENDDING") {
+                    throw response.data;
+                }
+            }
+
+            await new Promise(resolve => setTimeout(resolve, timeDelay));
+        } catch (error) {
+            console.error('Error fetching task status:', error.message);
+            throw error;
+        }
+    }
+};
 const GetStatusTaskTrans = async (taskId,timeDelay=1000) => {
     while (true) {
         try {
@@ -233,13 +255,38 @@ export const summarizeAsync = async (bucketName, fileKey = "", text = "") => {
     }
 };
 
-export const cleanTranscribeAsync = async (bucketName, transcription,fileName="", filePath="") => {
+export const cleanTranscribeAsync = async (bucketName,filePath) => {
 
     var url = "";
     try {
         const response = await axios.post(`${BASE_URL}clean-transcription-as`, {
             bucket_name: bucketName,
-            transcription:transcription,
+            //  transcription:transcription,
+            // file_name:'',
+            file_path:filePath
+        }, { headers: { 'Content-Type': 'application/json' } });
+        if (response && response.data) {
+            if (response.data.status === "in_progress") {
+                const res=await GetStatusTask(response.data.task_id)
+                return res.clean_text;
+            }
+            if (response.data.status === "failed") {
+                throw new Error(`clean failed: ${response.data.status}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error clean file:', error.message);
+        throw error;
+    }
+};
+
+export const cleanTranscribeAI = async (bucketName, transcription) => {
+
+    var url = "";
+    try {
+        const response = await axios.post(`${BASE_URL}clean-transcription-fin-as`, {
+            bucket_name: bucketName,
+            raw_text:transcription,
             file_name:''
         }, { headers: { 'Content-Type': 'application/json' } });
         if (response && response.data) {
@@ -267,7 +314,7 @@ export const UploadDictionaryAsync = async (bucketName, dicArray) => {
 
         if (response && response.data) {
             if (response.data.status === "in_progress") {
-                const res=await GetStatusTask(response.data.task_id)
+                const res=await GetStatusUploadDic(response.data.vocab_name)
                 return true;
             }
             if (response.data.status === "failed") {

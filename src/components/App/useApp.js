@@ -5,7 +5,7 @@ import {FetchHttpHandler} from "@aws-sdk/fetch-http-handler";
 import {StartStreamTranscriptionCommand, TranscribeStreamingClient} from "@aws-sdk/client-transcribe-streaming";
 import { Buffer } from 'buffer';
 import config from '../../app.config.json';
-import { uploadFile, TranscribeFileAsync, getFile,cleanTranscribeAsync,summarizeAsync } from '../../services/GeneralService'
+import { uploadFile, TranscribeFileAsync,cleanTranscribeAsync, getFile,cleanTranscribeAI,summarizeAsync } from '../../services/GeneralService'
 
 
 
@@ -61,7 +61,7 @@ export const useApp = () => {
           const handleProgress = progressText => {
             setTranscription(progressText)
           }
-          const cleanText = await cleanTranscribeAsync(config.bucketName, transcription)
+          const cleanText = await cleanTranscribeAI(config.bucketName, transcription)
           setTranscription(cleanText)
           setIsLoading(false);
     
@@ -215,7 +215,9 @@ export const useApp = () => {
             if (response) {
               const res = await TranscribeFileAsync(config.bucketName, '', fileName, language, numSpeakers, config.TranscriptionFolder)
               if (res) {
-                const response = await getFile(config.bucketName, res);
+                const resCleanText = await cleanTranscribeAsync(config.bucketName, res);
+                const response = await getFile(config.bucketName, resCleanText);
+
                 if (response) {
                   setTranscription(response);
                   setTranscriptionCopy(response)

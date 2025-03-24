@@ -261,8 +261,8 @@ export const cleanTranscribeAsync = async (bucketName,filePath) => {
     try {
         const response = await axios.post(`${BASE_URL}clean-transcription-as`, {
             bucket_name: bucketName,
-            //  transcription:transcription,
-            // file_name:'',
+              transcription:'',
+             file_name:'',
             file_path:filePath
         }, { headers: { 'Content-Type': 'application/json' } });
         if (response && response.data) {

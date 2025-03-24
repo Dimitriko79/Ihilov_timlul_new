@@ -52,7 +52,8 @@ const TranscriptionConfig = ({
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            disabled={disabled}
+            disabled="true"
+           // disabled={disabled}
             className="block max-w-60 w-full rounded-md border border-gray-300 py-2 px-3 mt text-right disabled:opacity-50 disabled:cursor-not-allowed font-noto"
             dir="rtl"
           >

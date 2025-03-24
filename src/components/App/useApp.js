@@ -216,11 +216,10 @@ export const useApp = () => {
               const res = await TranscribeFileAsync(config.bucketName, '', fileName, language, numSpeakers, config.TranscriptionFolder)
               if (res) {
                 const resCleanText = await cleanTranscribeAsync(config.bucketName, res);
-                const response = await getFile(config.bucketName, resCleanText);
 
-                if (response) {
-                  setTranscription(response);
-                  setTranscriptionCopy(response)
+                if (resCleanText) {
+                  setTranscription(resCleanText);
+                  setTranscriptionCopy(resCleanText)
     
                 }
               }

@@ -64,7 +64,7 @@ const ActionControl = props => {
                     type='file'
                     ref={fileInputRef}
                     onChange={handleFileSelect}
-                    accept='audio/*,text/plain'
+                    accept='audio/*,video/*,text/plain'
                     className='hidden'
                     id='file-upload'
                 />

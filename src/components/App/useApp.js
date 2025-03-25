@@ -148,7 +148,6 @@ export const useApp = () => {
 
     const handleFileSelect = async event => {
         setIsLoading(true);
-        setTranscription('');
         //setAudioUrl(null);
     
         const file = event.target.files[0]
@@ -164,10 +163,18 @@ export const useApp = () => {
           'audio/mp3', // MP3 files
           'audio/x-mp3', // Alternative MP3 MIME type
           'audio/mp4', // M4A files
+          'video/mp4',
+          'audio/amr', // M4A files
+          'video/amr',
+          'audio/flac',
+          'video/flac',
           'audio/wav', // WAV files
+          'video/wav', // WAV files
           'audio/x-wav', // Alternative WAV MIME type
           'audio/webm', // WebM audio
+          'video/webm', // WebM audio
           'audio/ogg', // OGG files
+          'video/ogg', // OGG files
           'audio/aac', // AAC files
           'audio/x-m4a', // Alternative M4A MIME type
           'text/plain'
@@ -182,7 +189,7 @@ export const useApp = () => {
         }
         if (!isSupported) {
           updateError(
-            'Please select a supported audio file (MPEG, MP3, WAV, M4A, WebM, OGG, AAC,TXT)'
+            'Please select a supported audio file ("mp3, mp4, wav, flac, ogg, amr, webm,txt")'
           )
           return
         }
@@ -453,7 +460,6 @@ export const useApp = () => {
                                     ...completeTranscriptsRef.current,
                                     speakerLabel + currentTranscript
                                 ].filter(Boolean).join('\n');
-
                                 setTranscription(displayText);
                             }
                         } else {
@@ -598,6 +604,7 @@ export const useApp = () => {
         fileInputRef,
         isRecording,
         transcription,
+        setTranscription,
         error,
         isProcessing,
         audioLevel,

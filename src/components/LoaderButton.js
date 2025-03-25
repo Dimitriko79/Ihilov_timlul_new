@@ -45,7 +45,7 @@ const LoaderButton = ({ isLoading, withIndicatorTime = false, isFromError = fals
   return (
     <div className="flex items-center justify-center gap-4 p-4">
       <button
-        className="flex flex-col items-center justify-center rounded-full p-2 bg-[#61dafb] text-white hover:bg-[#007e4191] disabled:opacity-50 w-60"
+        className="flex flex-col items-center justify-center rounded-full p-2  text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 w-60"
         disabled={isLoading}
       >
         {isVisible && (

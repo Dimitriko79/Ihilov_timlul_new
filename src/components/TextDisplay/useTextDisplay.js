@@ -1,29 +1,27 @@
 import {useEffect, useRef, useState} from "react";
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
 
-export const useTextDisplay = ({ text, sessionId } ) => {
+export const useTextDisplay = ({ text,setTranscription, sessionId } ) => {
     const [showCopy, setShowCopy] = useState(false);
     const [copied, setCopied] = useState(false);
-    const [currentText, setCurrentText] = useState(text);
+    // const [currentText, setCurrentText] = useState(text);
     const [textType, setTextType] = useState('original');
     const contentRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        setCurrentText(text);
-    }, [text]);
+  
 
     useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTop = contentRef.current.scrollHeight;
         }
-    }, [currentText]);
+    }, [text]);
 
     const handleCopy = async () => {
         try {
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = currentText;
+            tempDiv.innerHTML = text;
             const textToCopy = tempDiv.textContent || tempDiv.innerText;
 
             await navigator.clipboard.writeText(textToCopy);
@@ -71,12 +69,12 @@ export const useTextDisplay = ({ text, sessionId } ) => {
 
             const data = JSON.parse(result);
             const processedText = type === 'cleaned' ? data.html : data.summary;
-            setCurrentText(processedText?.split('\\n').join('\n') || '');
+            setTranscription(processedText?.split('\\n').join('\n') || '');
             setTextType(type);
         } catch (error) {
             console.error(`Error fetching ${type} text:`, error);
             setError(`Failed to load ${type} text`);
-            setCurrentText(text);
+            setTranscription(text);
             setTextType('original');
         } finally {
             setIsLoading(false);
@@ -88,7 +86,7 @@ export const useTextDisplay = ({ text, sessionId } ) => {
         copied,
         handleCopy,
         isLoading,
-        currentText, setCurrentText,
+        text, setTranscription,
         textType, setTextType,
         fetchTextFromS3,
         setCopied,

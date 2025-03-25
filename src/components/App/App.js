@@ -16,6 +16,7 @@ const MedicalTranscription = () => {
     fileInputRef,
     isRecording,
     transcription,
+    setTranscription,
     error,
     isProcessing,
     audioLevel,
@@ -72,6 +73,7 @@ const MedicalTranscription = () => {
             language={language}
             sessionId={sessionId}
             transcription={transcription}
+            setTranscription={setTranscription}
             selectedFileName={selectedFileName}
             isLoading={isLoading}
             transcriptionCopy={transcriptionCopy}

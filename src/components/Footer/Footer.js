@@ -11,6 +11,7 @@ const Footer = props => {
         language,
         sessionId,
         transcription,
+        setTranscription,
         selectedFileName,
         isLoading,
         transcriptionCopy
@@ -42,6 +43,7 @@ const Footer = props => {
             )}
             <TextDisplay
           text={transcription}
+          setTranscription={setTranscription}
           sessionId={sessionId}
           direction={language === 'he-IL' || language === 'ar-AE' ? 'rtl' : 'ltr'}
           textCopy={transcriptionCopy}

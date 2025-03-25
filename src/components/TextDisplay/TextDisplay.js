@@ -3,7 +3,7 @@ import { useTextDisplay } from "./useTextDisplay";
 import { RotateCcw } from "lucide-react";
 
 
-const TextDisplay = ({ text, sessionId, direction, textCopy }) => {
+const TextDisplay = ({ text,setTranscription, sessionId, direction, textCopy }) => {
   const {
     copied,
     handleCopy,
@@ -12,10 +12,10 @@ const TextDisplay = ({ text, sessionId, direction, textCopy }) => {
     textType, setTextType,
     fetchTextFromS3,
     error, contentRef
-  } = useTextDisplay({ text, sessionId });
+  } = useTextDisplay({ text,setTranscription, sessionId });
 
   const handleDownload = () => {
-    const blob = new Blob([currentText], { type: 'text/plain' }); // יצירת קובץ Blob עם תוכן כטקסט
+    const blob = new Blob([text], { type: 'text/plain' }); // יצירת קובץ Blob עם תוכן כטקסט
     const url = URL.createObjectURL(blob); // יצירת URL זמני להורדה
 
     // יצירת אלמנט לינק להורדה
@@ -58,7 +58,7 @@ const TextDisplay = ({ text, sessionId, direction, textCopy }) => {
               handleDownload()
             }}
             className="px-3 py-1 rounded-md text-sm transition-all duration-200 text-white bg-green-500 hover:bg-green-600"
-            disabled={currentText === ''}
+            disabled={text === ''}
           >
             <span className="flex items-center gap-1">
 
@@ -68,10 +68,11 @@ const TextDisplay = ({ text, sessionId, direction, textCopy }) => {
           </button>
           <button
             onClick={() => {
-              setCurrentText(textCopy)
+              // setCurrentText(textCopy)
+              setTranscription(textCopy)
             }}
             className="px-3 py-1 rounded-md text-sm transition-all duration-200 text-white bg-purple-500 hover:bg-purple-600"
-            disabled={currentText === ''}
+            disabled={text === ''}
           >
             שחזור תמלול מקורי
 
@@ -109,7 +110,7 @@ const TextDisplay = ({ text, sessionId, direction, textCopy }) => {
 
         <div
           ref={contentRef}
-          dangerouslySetInnerHTML={{ __html: currentText.replace(/\\n/g, '<br/>') }}
+          dangerouslySetInnerHTML={{ __html: text.replace(/\\n/g, '<br/>') }}
           className={`absolute inset-0 p-4 border-2 border-blue-300 rounded-lg text-right focus:outline-none focus:border-blue-500 overflow-auto bg-white`}
           dir={direction}
           style={{
